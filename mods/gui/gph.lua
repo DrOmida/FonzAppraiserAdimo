@@ -236,7 +236,7 @@ update = function()
     if value_session then value_session:updateDisplay(session.getCurrentTotalValue()) end
     
     -- Update Duration
-    local currentSession = session.getCurrentSession()
+    local _, currentSession = session.isCurrent()
     local duration = 0
     if currentSession then
          -- Using session.sessionDuration logic locally if needed, but assuming session module handles it
