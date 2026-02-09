@@ -33,7 +33,7 @@ do
   M.frame = frame
   gui.styles["panel"](frame)
   frame:SetBackdropColor(0, 0, 0, 0.3) -- 30% transparency
-  gui.setSize(frame, 98, 80) -- Reduced height (80) to compact space between data and buttons
+  gui.setSize(frame, 120, 80) -- Increased width to 120
   frame:SetClampedToScreen(true)
   frame:SetMovable(true)
   frame:EnableMouse(true)

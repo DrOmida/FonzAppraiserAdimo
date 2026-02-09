@@ -134,8 +134,8 @@ do
     frame:SetText(text or OKAY)
     frame:SetScript("OnClick", function()
       PlaySound(sounds.click)
-      if this.onClick then
-        this:onClick()
+      if frame.onClick then
+        frame:onClick()
       end
     end)
     return frame
@@ -155,29 +155,29 @@ do
     texture:SetBlendMode(blending or "ADD")
     
     frame:SetScript("OnEnter", function()
-      this.texture:SetAlpha(highlight_alpha or 1.0)
-      if this.tooltipOn then
-        this:tooltipOn()
+      frame.texture:SetAlpha(highlight_alpha or 1.0)
+      if frame.tooltipOn then
+        frame:tooltipOn()
       end
     end)
     frame:SetScript("OnLeave", function()
-      this.texture:SetAlpha(unhighlight_alpha or 1.0)
-      if this.tooltipOn then
-        this:tooltipOff()
+      frame.texture:SetAlpha(unhighlight_alpha or 1.0)
+      if frame.tooltipOn then
+        frame:tooltipOff()
       end
     end)
     frame:SetScript("OnMouseUp", function()
-      this.texture:SetPoint("TOPLEFT", this, "TOPLEFT", 0, 0)
+      frame.texture:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
     end)
     frame:SetScript("OnMouseDown", function()
-      if this:IsEnabled() then
-        this.texture:SetPoint("TOPLEFT", this, "TOPLEFT", 1, -1)
+      if frame:IsEnabled() then
+        frame.texture:SetPoint("TOPLEFT", frame, "TOPLEFT", 1, -1)
       end
     end)
     frame:SetScript("OnClick", function()
       PlaySound(sounds.click)
-      if this.onClick then
-        this:onClick()
+      if frame.onClick then
+        frame:onClick()
       end
     end)
     return frame
@@ -273,14 +273,14 @@ do
     end
     
     frame:SetScript("OnClick", function()
-      if this:GetChecked() then
+      if frame:GetChecked() then
         PlaySound(sounds.click_off)
       else
         PlaySound(sounds.click_on)
       end
-      this:hideIndeterminate()
-      if this.onClick then
-        this:onClick()
+      frame:hideIndeterminate()
+      if frame.onClick then
+        frame:onClick()
       end
     end)
     return frame
@@ -332,8 +332,8 @@ do
     enableHighlight(entry)
     
     entry:SetScript("OnClick", function()
-      if this.onClick then
-        this:onClick()
+      if entry.onClick then
+        entry:onClick()
       end
     end)
     
@@ -458,9 +458,8 @@ do
     button:SetPoint("TOPLEFT", entry_checkbox, "TOPRIGHT")
     button:SetPoint("BOTTOMRIGHT", entry, 0, 0)
     enableHighlight(button)
-    button:SetScript("OnClick", function(self)
-      local self = self or this
-      local entry = self:GetParent()
+    button:SetScript("OnClick", function()
+      local entry = button:GetParent()
       local handler = entry:GetScript("OnClick")
       if handler then entry:Click() end
     end)
@@ -502,9 +501,8 @@ do
       button:SetPoint("TOPLEFT", entry_checkbox, "TOPRIGHT")
       button:SetPoint("BOTTOMRIGHT", entry, 0, 0)      
       enableHighlight(button)
-      button:SetScript("OnClick", function(self)
-        local self = self or this
-        local entry = self:GetParent()
+      button:SetScript("OnClick", function()
+        local entry = button:GetParent()
         local handler = entry:GetScript("OnClick")
         if handler then entry:Click() end
       end)
