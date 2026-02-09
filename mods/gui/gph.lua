@@ -102,7 +102,7 @@ end
 
 do
   -- Start/Pause Button (P)
-  start_pause_button = gui.button(frame, nil, 20, 20, "Start")
+  start_pause_button = gui.simpleButton(frame, nil, 20, 20, ">")
   M.start_pause_button = start_pause_button
   start_pause_button:SetPoint("BOTTOMLEFT", frame, 6, 4)
   start_pause_button.onClick = function()
@@ -129,7 +129,7 @@ do
   start_pause_button:SetScript("OnLeave", function() GameTooltip:Hide() end)
   
   -- Stop Button (S)
-  stop_button = gui.button(frame, nil, 20, 20, "S")
+  stop_button = gui.simpleButton(frame, nil, 20, 20, "S")
   M.stop_button = stop_button
   stop_button:SetPoint("LEFT", start_pause_button, "RIGHT", 2, 0)
   stop_button.onClick = function()
@@ -143,7 +143,7 @@ do
   stop_button:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
   -- Config Button (Cogwheel/O)
-  config_button = gui.button(frame, nil, 20, 20, "O")
+  config_button = gui.simpleButton(frame, nil, 20, 20, "O")
   config_button:SetPoint("LEFT", stop_button, "RIGHT", 2, 0)
   config_button.onClick = function()
     A.toggleMainWindow()
@@ -156,7 +156,7 @@ do
   config_button:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
   -- Close button (X)
-  close_button = gui.button(frame, nil, 20, 20, "X")
+  close_button = gui.simpleButton(frame, nil, 20, 20, "X")
   close_button:SetPoint("LEFT", config_button, "RIGHT", 2, 0)
   close_button.onClick = function()
     local db = A.getCharConfig("fa.gui.gph")
@@ -174,6 +174,8 @@ end
 -- Define update function locally first
 update = function()
   local db = A.getCharConfig("fa.gui.gph")
+  if not db then return end -- Safety check
+  
   if db.show then
     frame:Show()
   else

@@ -141,6 +141,59 @@ do
     return frame
   end
   
+  function M.simpleButton(parent, id, width, height, text)
+    local frame = CreateFrame("Button", id or name(parent), parent)
+    frame:SetWidth(width or 20)
+    frame:SetHeight(height or 20)
+    
+    local bg = frame:CreateTexture(nil, "BACKGROUND")
+    bg:SetAllPoints(frame)
+    bg:SetTexture(0.1, 0.1, 0.1, 0.5)
+    frame.bg = bg
+    
+    local highlight = frame:CreateTexture(nil, "HIGHLIGHT")
+    highlight:SetAllPoints(frame)
+    highlight:SetTexture(1, 1, 1, 0.2)
+    frame:SetHighlightTexture(highlight)
+    
+    local fs = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    fs:SetPoint("CENTER", frame, "CENTER", 0, 0)
+    fs:SetText(text or "")
+    frame:SetFontString(fs)
+    
+    frame:SetScript("OnMouseDown", function()
+      if frame:IsEnabled() then
+        bg:SetTexture(0, 0, 0, 0.5)
+        fs:SetPoint("CENTER", frame, "CENTER", 1, -1)
+      end
+    end)
+    
+    frame:SetScript("OnMouseUp", function()
+      if frame:IsEnabled() then
+        bg:SetTexture(0.1, 0.1, 0.1, 0.5)
+        fs:SetPoint("CENTER", frame, "CENTER", 0, 0)
+      end
+    end)
+    
+    frame:SetScript("OnDisable", function()
+      fs:SetTextColor(0.5, 0.5, 0.5)
+      bg:SetTexture(0.1, 0.1, 0.1, 0.2)
+    end)
+    
+    frame:SetScript("OnEnable", function()
+      fs:SetTextColor(1, 1, 1)
+      bg:SetTexture(0.1, 0.1, 0.1, 0.5)
+    end)
+    
+    frame:SetScript("OnClick", function()
+      PlaySound(sounds.click)
+      if frame.onClick then
+        frame:onClick()
+      end
+    end)
+    return frame
+  end
+  
   function M.imgButton(parent, id, width, height, img, blending, 
       initial_alpha, highlight_alpha, unhighlight_alpha)
     local frame = CreateFrame("Button", id or name(parent), parent)
