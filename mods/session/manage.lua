@@ -23,14 +23,21 @@ local money_types = {
 }
 M.money_types = money_types
 
+local function getSessionElapsed(current)
+  local elapsed = diffTime(currentTime(), current.start)
+  local pause_total = current.pause_total or 0
+  return elapsed - pause_total
+end
+
 function M.lootMoney(money, money_type)
   local running, current = isCurrent()
   if not running then return end
+  if current.paused then return end
   
   current.money = current.money + money
   
   local zone_id = addZone(current.zones)
-  local time_diff = diffTime(currentTime(), current.start)
+  local time_diff = getSessionElapsed(current)
   local type_id = money_types[money_type]
   tinsert(current.money_loots, { zone_id, time_diff, money, type_id })
   
@@ -59,9 +66,10 @@ do
   function M.lootItem(code, item_count, item_id)
     local running, current = isCurrent()
     if not running then return end
+    if current.paused then return end
     
     local zone_id = addZone(current.zones)
-    local time_diff = diffTime(currentTime(), current.start)
+    local time_diff = getSessionElapsed(current)
     local loot_id = addLoot(current.loots, zone_id, time_diff, code, 
       item_count)
     addItem(current.items, code, item_count, loot_id)
@@ -97,6 +105,9 @@ do
         money_loots={},
         items={},
         hots={},
+        pause_total=0,
+        paused=false,
+        pause_started=nil,
       }
     end,
     stop = function(current)
@@ -142,6 +153,12 @@ do
     -- Stop any current session
     local _, current = isCurrent()
     if current then
+      if current.paused and current.pause_started then
+        local paused_for = diffTime(currentTime(), current.pause_started)
+        current.pause_total = (current.pause_total or 0) + (paused_for or 0)
+        current.paused = nil
+        current.pause_started = nil
+      end
       actions.stop(current)
     end
     -- Create a new session
@@ -171,6 +188,12 @@ do
       return
     end
     
+    if current.paused and current.pause_started then
+      local paused_for = diffTime(currentTime(), current.pause_started)
+      current.pause_total = (current.pause_total or 0) + (paused_for or 0)
+      current.paused = nil
+      current.pause_started = nil
+    end
     actions.stop(current)
     setSessionsChecksum()
     A:ePrint(L["Current session stopped."])
@@ -179,6 +202,37 @@ do
     A:guiUpdate()
   end
   A.stopSession = stopSession
+
+  function M.pauseSession()
+    local _, current = isCurrent()
+    if not current or current.paused then return end
+    current.paused = true
+    current.pause_started = currentTime()
+    A:guiUpdate()
+  end
+  A.pauseSession = pauseSession
+
+  function M.resumeSession()
+    local _, current = isCurrent()
+    if not current or not current.paused then return end
+    local paused_for = diffTime(currentTime(), current.pause_started)
+    current.pause_total = (current.pause_total or 0) + (paused_for or 0)
+    current.paused = nil
+    current.pause_started = nil
+    A:guiUpdate()
+  end
+  A.resumeSession = resumeSession
+
+  function M.togglePause()
+    local _, current = isCurrent()
+    if not current then return end
+    if current.paused then
+      resumeSession()
+    else
+      pauseSession()
+    end
+  end
+  A.togglePause = togglePause
   
   function M.deleteSession(session_index)
     A.trace("Delete session.")

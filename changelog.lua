@@ -1,6 +1,14 @@
 local A = FonzAppraiser
 
-A.HELP_VERSION = [[Version 3.3.0 - 2025-12-10 |cffffffff
+A.HELP_VERSION = [[Version 3.3.1 - 2026-02-09 |cffffffff
+[+] Added Gold Per Hour (GPH) HUD frame with Start/Pause/Stop controls.
+[+] Added Session Value to the GPH HUD.
+[+] Added Minimap button middle-click to toggle GPH HUD visibility.
+[+] Added slash commands /fa hud and /fa hud move.
+[+] Added option to show/hide GPH HUD in General Settings.
+[*] Updated session tracking to support pausing.
+
+|rVersion 3.3.0 - 2025-12-10 |cffffffff
 [*] [Summary Tab] clickable text now highlights on mouseover.
 [*] [Summary Tab] Target Value currency text can also be clicked like the 
 progress bar to change the target value.

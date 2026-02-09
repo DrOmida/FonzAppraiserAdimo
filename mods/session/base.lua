@@ -145,6 +145,13 @@ do
     end
   end
   
+  function M.isPaused(session)
+    local current = session or getLastSession()
+    if current and current.paused then
+      return true, current
+    end
+  end
+  
   function M.hasMaxSessions()
     local db = A.getCharConfig("fa.session")
     return getn(db.sessions) == db.max_sessions
@@ -256,9 +263,14 @@ do
   end
   
   function M.sessionDuration(session)
-    return session 
-      and session.stop and diffTime(session.stop, session.start)
-      or diffTime(currentTime(), session.start)
+    if not session then return end
+    local end_time = session.stop or currentTime()
+    local duration = diffTime(end_time, session.start)
+    local pause_total = session.pause_total or 0
+    if session.paused and session.pause_started then
+      pause_total = pause_total + diffTime(end_time, session.pause_started)
+    end
+    return math.max(duration - pause_total, 0)
   end
   M.getSessionDuration = sessionDuration
   
@@ -377,19 +389,22 @@ do
     local PERIOD = 60*60
     local pricingValue = pricing.value
     
-    function M.isValidPerHourValue(session, money_loot_time, item_loot_time)
+    function M.isValidPerHourValue(session, money_loot_elapsed, item_loot_elapsed)
       local _, current = isCurrent()
       if not current or not session or current ~= session then return end
-      if not money_loot_time and not item_loot_time then return end
+      if not money_loot_elapsed and not item_loot_elapsed then return end
+      
+      local elapsed = sessionDuration(current)
+      if not elapsed then return end
       
       local looted_in_past_hour = false
-      if money_loot_time and 
-          diffTime(currentTime(), money_loot_time) <= PERIOD then
+      if money_loot_elapsed and 
+          (elapsed - money_loot_elapsed) <= PERIOD then
         looted_in_past_hour = true
       end
       
-      if item_loot_time and
-          diffTime(currentTime(), item_loot_time) <= PERIOD then
+      if item_loot_elapsed and
+          (elapsed - item_loot_elapsed) <= PERIOD then
         looted_in_past_hour = true
       end
       
@@ -400,7 +415,8 @@ do
       local _, current = isCurrent()
       if not current then return end
       
-      local start_time = current.start
+      local elapsed = sessionDuration(current)
+      if not elapsed then return end
       local item_loots = current.loots
       local money_loots = current.money_loots
       local item_loots_count = getn(item_loots)
@@ -411,42 +427,42 @@ do
       end
       
       local value = 0
-      local money_loot_index, money_loot_time
+      local money_loot_index, money_loot_elapsed
       if money_loots_count > 0 then
         for i=1,money_loots_count do
           money_loot_index = money_loots_count + 1 - i
           local loot = money_loots[money_loot_index]
-          local loot_time = addTime(start_time, loot[2])
+          local loot_elapsed = loot[2]
           
-          if diffTime(currentTime(), loot_time) <= PERIOD then
+          if (elapsed - loot_elapsed) <= PERIOD then
             value = value + loot[3]
-            money_loot_time = loot_time
+            money_loot_elapsed = loot_elapsed
           else
             break
           end
         end
       end
       
-      local item_loot_index, item_loot_time
+      local item_loot_index, item_loot_elapsed
       if item_loots_count > 0 then
         for i=1,item_loots_count do
           item_loot_index = item_loots_count + 1 - i
           local loot = item_loots[item_loot_index]
-          local loot_time = addTime(start_time, loot[2])
+          local loot_elapsed = loot[2]
           
-          if diffTime(currentTime(), loot_time) <= PERIOD then
+          if (elapsed - loot_elapsed) <= PERIOD then
             local code = loot[3]
             local count = loot[4]
             local item_value = pricingValue(code)
             value = value + (item_value or 0) * count
-            item_loot_time = loot_time
+            item_loot_elapsed = loot_elapsed
           else
             break
           end
         end
       end
 
-      return value, current, money_loot_time, item_loot_time
+      return value, current, money_loot_elapsed, item_loot_elapsed
     end
   end
 end

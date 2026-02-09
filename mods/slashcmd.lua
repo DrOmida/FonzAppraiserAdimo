@@ -12,6 +12,7 @@ local util = A.requires(
 local palette = A.require 'fa.palette'
 local misc = A.require 'fa.misc'
 local gui_config = A.require 'fa.gui.config'
+local gui_gph = A.require 'fa.gui.gph'
 
 local color_heading = palette.color.yellow
 local color_group = palette.color.blue1
@@ -260,6 +261,14 @@ do
     gui_config.update()
   end
   
+  local function toggleHud()
+    gui_gph.toggleWindow()
+  end
+  
+  local function toggleHudMove()
+    gui_gph.toggleLock()
+  end
+
   if not A.options then
     A.options = {
       type = "group",
@@ -285,5 +294,17 @@ do
     name = L["Bag value (reverse)"],
     desc = L["Value of non-soulbound items in bags (reverse)"],
     func = SlashCmdList.fa_rvalue,
+  }
+  A.options.args["Hud"] = {
+    type = "execute",
+    name = L["Toggle HUD"],
+    desc = L["Toggle GPH HUD visibility"],
+    func = toggleHud,
+  }
+  A.options.args["HudMove"] = {
+    type = "execute",
+    name = L["Toggle HUD Lock"],
+    desc = L["Toggle GPH HUD movement lock"],
+    func = toggleHudMove,
   }
 end

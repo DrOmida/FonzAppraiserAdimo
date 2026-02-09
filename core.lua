@@ -16,6 +16,7 @@ local session = A.require 'fa.session'
 local misc = A.require 'fa.misc'
 local gui_main = A.require 'fa.gui.main'
 local gui_config = A.require 'fa.gui.config'
+local gui_gph = A.require 'fa.gui.gph'
 local gui_minimap = A.require 'fa.gui.minimap'
 
 -- Events --
@@ -199,6 +200,7 @@ end
 function A:guiUpdate()
   gui_main.update()
   gui_config.update()
+  gui_gph.update()
   gui_minimap.update()
 end
 
@@ -227,6 +229,7 @@ frame:SetScript("OnEvent", function()
     A.loaded_name = A.name
     A.setCharConfigDefaults()
     filter.populateItemType()
+    gui_gph.applySettings()
     gui_minimap.update()
   else
     local event_method = A[event]

@@ -9,6 +9,7 @@ local palette = A.require 'fa.palette'
 local notice = A.require 'fa.notice'
 local session = A.require 'fa.session'
 local gui = A.require 'fa.gui'
+local gph = A.require 'fa.gui.gph'
 
 -- Minimap icon
 do
@@ -19,7 +20,7 @@ do
   frame:SetMovable(true)
   frame:EnableMouse(true)
   frame:RegisterForDrag("LeftButton")
-  frame:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+  frame:RegisterForClicks("LeftButtonUp", "RightButtonUp", "MiddleButtonUp")
   frame:SetFrameStrata("LOW")
   gui.setSize(frame, 31)
   frame:SetFrameLevel(9)
@@ -163,7 +164,9 @@ end
 -- Clicks
 
 icon:SetScript("OnClick", function()
-  if arg1 == "LeftButton" then
+  if arg1 == "MiddleButton" then
+    gph.toggleWindow()
+  elseif arg1 == "LeftButton" then
     A.toggleMainWindow()
   else
     A.toggleConfigWindow()

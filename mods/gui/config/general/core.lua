@@ -12,6 +12,7 @@ local palette = A.require 'fa.palette'
 local gui = A.require 'fa.gui'
 local config = A.require 'fa.gui.config'
 local minimap = A.require 'fa.gui.minimap'
+local gph = A.require 'fa.gui.gph'
 
 local defaults = {
   show_minimap = true,
@@ -24,6 +25,7 @@ function M.update()
   minimap_checkbox:update()
   enable_checkbox:update()
   confirm_oldest_checkbox:update()
+  gph_checkbox:update()
 end
 
 function updateMinimapCheckbox(self)
@@ -64,4 +66,14 @@ function confirmOldestCheckboxOnClick(self)
   local db = A.getCharConfig("fa.session")
   db.confirm_delete_oldest = not db.confirm_delete_oldest
   self:SetChecked(db.confirm_delete_oldest)
+end
+
+function updateGphCheckbox(self)
+  local db = A.getCharConfig("fa.gui.gph")
+  self:SetChecked(db.show)
+end
+
+function gphCheckboxOnClick(self)
+  gph.toggleWindow()
+  self:SetChecked(A.getCharConfig("fa.gui.gph").show)
 end

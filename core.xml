@@ -54,6 +54,7 @@
   <Include file="mods\gui\help\description.lua"/>
   <Include file="mods\gui\help\version.lua"/>
   <Include file="mods\gui\help\credits.lua"/>
+  <Include file="mods\gui\gph.lua"/>
   <Include file="mods\gui\minimap.lua"/>
   <Include file="mods\slashcmd.lua"/>
   

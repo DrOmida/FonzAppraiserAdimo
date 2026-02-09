@@ -68,3 +68,20 @@ do
   fontstring:SetJustifyV("TOP")
   fontstring:SetHeight(checkbox:GetHeight())
 end
+
+do
+  local checkbox = gui.checkbox(general)
+  checkbox:SetPoint("TOPRIGHT", confirm_oldest_checkbox, "BOTTOMRIGHT", 0, 5)
+  M.gph_checkbox = checkbox
+  checkbox.onClick = gphCheckboxOnClick
+  checkbox.update = updateGphCheckbox
+  
+  local fontstring = checkbox:CreateFontString()
+  checkbox.text = fontstring
+  fontstring:SetFontObject(GameFontNormal)
+  fontstring:SetText(L["Show GPH HUD"])
+  fontstring:SetPoint("TOPLEFT", confirm_oldest_checkbox.text, "BOTTOMLEFT", 0, 5)
+  fontstring:SetJustifyH("LEFT")
+  fontstring:SetJustifyV("TOP")
+  fontstring:SetHeight(checkbox:GetHeight())
+end

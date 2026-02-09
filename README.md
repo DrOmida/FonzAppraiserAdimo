@@ -7,10 +7,13 @@ track the value of personal loot.
 This fork was updated by **Adimo** with Turtle WoW compatibility in mind.
 
 ### Added Features
-* Movable Gold-Per-Hour display frame.
-* Start / Pause / Resume / Stop controls for session tracking.
-* Minimap middle-click toggle to show or hide the GPH frame.
-* Pause-aware timing so session duration and GPH exclude paused time.
+* **Movable Gold-Per-Hour (GPH) HUD**: Tracks your gold per hour in real-time.
+* **Session Controls**: Start, Pause, Resume, and Stop sessions directly from the HUD.
+* **Session Value**: Displays the total value of the current session in the HUD.
+* **Minimap Integration**: Middle-click the minimap button to toggle the GPH HUD visibility.
+* **Slash Commands**: Use `/fa hud` to toggle visibility and `/fa hud move` to lock/unlock the HUD.
+* **Settings**: Option to show/hide the GPH HUD added to General Settings.
+* **Pause-Aware**: Session duration and GPH calculations exclude paused time for accuracy.
 
 ## Core Features
 
