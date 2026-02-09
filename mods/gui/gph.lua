@@ -26,7 +26,7 @@ A.registerCharConfigDefaults("fa.gui.gph", defaults)
 local frame
 local value, value_session, value_time
 local start_pause_button, stop_button, close_button, config_button
-local update -- Forward declaration
+local update, updateData -- Forward declaration
 
 -- 3. Local Helper: Safe Simple Button Factory
 -- Completely self-contained to avoid dependencies on external factories
@@ -130,7 +130,7 @@ do
     frame:SetScript("OnUpdate", function()
         elapsed = elapsed + arg1
         if elapsed >= 1.0 then
-            update()
+            if updateData then updateData() end
             elapsed = 0
         end
     end)
@@ -225,22 +225,10 @@ do
     SetTooltip(close_button, function() return L["Hide HUD"] end)
 end
 
--- 5. Update Function
-update = function()
-    local db = A.getCharConfig("fa.gui.gph")
-    if not db then return end
-    
-    if db.show then
-        frame:Show()
-        -- Restore position if available
-        if db.point then
-            frame:ClearAllPoints()
-            frame:SetPoint(db.point, db.relative or "UIParent", db.relativePoint or "CENTER", db.x or 0, db.y or 0)
-        end
-    else
-        frame:Hide()
-    end
-    
+-- 5. Update Functions
+
+-- Updates only the data/text (safe to call during drag)
+updateData = function()
     -- Update Data
     if value then value:updateDisplay(session.getCurrentPerHourValue()) end
     if value_session then value_session:updateDisplay(session.getCurrentTotalValue()) end
@@ -249,8 +237,6 @@ update = function()
     local _, currentSession = session.isCurrent()
     local duration = 0
     if currentSession then
-         -- Using session.sessionDuration logic locally if needed, but assuming session module handles it
-         -- We need to check if session.sessionDuration exists, otherwise implement simple calc
          if session.sessionDuration then
              duration = session.sessionDuration(currentSession)
          end
@@ -269,8 +255,28 @@ update = function()
     end
 end
 
+-- Full update (Layout + Data)
+update = function()
+    local db = A.getCharConfig("fa.gui.gph")
+    if not db then return end
+    
+    if db.show then
+        frame:Show()
+        -- Always restore position on full update request (e.g. profile load)
+        if db.point then
+             frame:ClearAllPoints()
+             frame:SetPoint(db.point, db.relative or "UIParent", db.relativePoint or "CENTER", db.x or 0, db.y or 0)
+        end
+    else
+        frame:Hide()
+    end
+    
+    updateData()
+end
+
 M.update = update
 M.applySettings = update -- Added to fix core.lua dependency
+
 
 -- Slash Command Helpers
 function M.showWindow()
