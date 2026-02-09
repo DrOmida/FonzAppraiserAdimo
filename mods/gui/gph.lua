@@ -41,32 +41,17 @@ do
   frame:EnableMouse(true)
   frame:RegisterForDrag("LeftButton")
   frame:SetFrameStrata("LOW")
+  frame:SetFrameLevel(1) -- Ensure base level
   
   -- Use frame reference instead of 'this' for safety
   frame:SetScript("OnDragStart", function()
     local db = A.getCharConfig("fa.gui.gph")
     if not db.locked then
-      -- Disable buttons during drag to prevent tooltip conflicts/crashes
-      if start_pause_button then start_pause_button:EnableMouse(false) end
-      if stop_button then stop_button:EnableMouse(false) end
-      if config_button then config_button:EnableMouse(false) end
-      if close_button then close_button:EnableMouse(false) end
-      
       frame:StartMoving()
     end
   end)
   frame:SetScript("OnDragStop", function()
     frame:StopMovingOrSizing()
-    
-    -- Delay re-enable buttons by one frame to prevent crash on release
-    frame:SetScript("OnUpdate", function()
-      frame:SetScript("OnUpdate", nil)
-      if start_pause_button then start_pause_button:EnableMouse(true) end
-      if stop_button then stop_button:EnableMouse(true) end
-      if config_button then config_button:EnableMouse(true) end
-      if close_button then close_button:EnableMouse(true) end
-    end)
-    
     local db = A.getCharConfig("fa.gui.gph")
     local point, relativeTo, relativePoint, x, y = frame:GetPoint(1)
     db.point = point
@@ -121,6 +106,7 @@ end
 do
   -- Start/Pause Button (P)
   start_pause_button = gui.simpleButton(frame, nil, 20, 20, ">")
+  start_pause_button:SetFrameLevel(2) -- Ensure higher than background
   M.start_pause_button = start_pause_button
   start_pause_button:SetPoint("BOTTOMLEFT", frame, 6, 4)
   start_pause_button.onClick = function()
@@ -148,6 +134,7 @@ do
   
   -- Stop Button (S)
   stop_button = gui.simpleButton(frame, nil, 20, 20, "S")
+  stop_button:SetFrameLevel(2)
   M.stop_button = stop_button
   stop_button:SetPoint("LEFT", start_pause_button, "RIGHT", 2, 0)
   stop_button.onClick = function()
@@ -162,6 +149,7 @@ do
 
   -- Config Button (Cogwheel/O)
   config_button = gui.simpleButton(frame, nil, 20, 20, "O")
+  config_button:SetFrameLevel(2)
   config_button:SetPoint("LEFT", stop_button, "RIGHT", 2, 0)
   config_button.onClick = function()
     A.toggleMainWindow()
@@ -175,6 +163,7 @@ do
 
   -- Close button (X)
   close_button = gui.simpleButton(frame, nil, 20, 20, "X")
+  close_button:SetFrameLevel(2)
   close_button:SetPoint("LEFT", config_button, "RIGHT", 2, 0)
   close_button.onClick = function()
     local db = A.getCharConfig("fa.gui.gph")
