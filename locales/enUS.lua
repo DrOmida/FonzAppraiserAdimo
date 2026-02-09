@@ -264,6 +264,8 @@ stop session - so you can use it as a timer too.</p>
 <br/>
 <h2>General Slash Commands:</h2>
 <h3>/fa show</h3><p> - show the main window.</p>
+<h3>/fa hide</h3><p> - hide the main window.</p>
+<h3>/fa move</h3><p> - toggle whether the HUD can be moved.</p>
 <h3>/fa start</h3><p> - start a new session (stops any previous session).</p>
 <h3>/fa stop</h3><p> - stop the current session.</p>
 <h3>/fa config</h3><p> - show the configuration window.</p>
