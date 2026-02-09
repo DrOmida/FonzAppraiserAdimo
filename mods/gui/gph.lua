@@ -3,7 +3,10 @@ local L = A.locale
 
 A.module 'fa.gui.gph'
 
-local util = A.require 'util.money'
+local util = A.requires(
+  'util.money',
+  'util.time'
+)
 local gui = A.require 'fa.gui'
 local session = A.require 'fa.session'
 
@@ -20,32 +23,34 @@ A.registerCharConfigDefaults("fa.gui.gph", defaults)
 
 -- File-scope locals for internal access (bypassing module proxy)
 local frame
-local value, value_session
+local value, value_session, value_time
 local start_pause_button, stop_button
-local close_button
+local close_button, config_button
 local update -- Forward declaration
 
 do
   frame = CreateFrame("Frame", "FonzAppraiserGphFrame", UIParent)
   M.frame = frame
   gui.styles["panel"](frame)
-  gui.setSize(frame, 130, 70) -- Reduced width and height
+  frame:SetBackdropColor(0, 0, 0, 0.3) -- 30% transparency
+  gui.setSize(frame, 130, 64) -- Further reduced height
   frame:SetClampedToScreen(true)
   frame:SetMovable(true)
   frame:EnableMouse(true)
   frame:RegisterForDrag("LeftButton")
   frame:SetFrameStrata("LOW")
   
+  -- Use frame reference instead of 'this' for safety
   frame:SetScript("OnDragStart", function()
     local db = A.getCharConfig("fa.gui.gph")
     if not db.locked then
-      this:StartMoving()
+      frame:StartMoving()
     end
   end)
   frame:SetScript("OnDragStop", function()
-    this:StopMovingOrSizing()
+    frame:StopMovingOrSizing()
     local db = A.getCharConfig("fa.gui.gph")
-    local point, relativeTo, relativePoint, x, y = this:GetPoint(1)
+    local point, relativeTo, relativePoint, x, y = frame:GetPoint(1)
     db.point = point
     db.relative = relativeTo and relativeTo:GetName() or "UIParent"
     db.relativePoint = relativePoint
@@ -78,6 +83,19 @@ do
   value_session:SetJustifyH("RIGHT")
   value_session.updateDisplay = function(self, v)
     v = v and util.formatMoneyFull(v, true, nil, true) or "-"
+    self:SetText(v)
+  end
+
+  local label_time = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+  label_time:SetPoint("TOPLEFT", label_session, "BOTTOMLEFT", 0, -2)
+  label_time:SetText(L["Time:"] or "Time:")
+  
+  value_time = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+  M.value_time = value_time
+  value_time:SetPoint("TOPRIGHT", value_session, "BOTTOMRIGHT", 0, -2)
+  value_time:SetJustifyH("RIGHT")
+  value_time.updateDisplay = function(self, v)
+    v = v and util.formatDurationFull(v) or "-"
     self:SetText(v)
   end
 end
@@ -124,9 +142,22 @@ do
   end)
   stop_button:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
+  -- Config Button (Cogwheel/O)
+  config_button = gui.button(frame, nil, 20, 20, "O")
+  config_button:SetPoint("LEFT", stop_button, "RIGHT", 2, 0)
+  config_button.onClick = function()
+    A.toggleMainWindow()
+  end
+  config_button:SetScript("OnEnter", function()
+    GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+    GameTooltip:SetText(L["Open Configuration"])
+    GameTooltip:Show()
+  end)
+  config_button:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
   -- Close button (X)
   close_button = gui.button(frame, nil, 20, 20, "X")
-  close_button:SetPoint("LEFT", stop_button, "RIGHT", 2, 0)
+  close_button:SetPoint("LEFT", config_button, "RIGHT", 2, 0)
   close_button.onClick = function()
     local db = A.getCharConfig("fa.gui.gph")
     db.show = false
@@ -151,6 +182,9 @@ update = function()
   
   value:updateDisplay(session.getCurrentPerHourValue())
   value_session:updateDisplay(session.getCurrentTotalValue())
+  
+  local _, current = session.isCurrent()
+  value_time:updateDisplay(current and session.getSessionDuration(current))
   
   if not session.isCurrent() then
     start_pause_button:SetText(">")
@@ -200,11 +234,10 @@ end
 function M.toggleLock()
   local db = A.getCharConfig("fa.gui.gph")
   db.locked = not db.locked
-  if db.locked then
-    A.info(L["GPH HUD locked."])
-  else
-    A.info(L["GPH HUD unlocked."])
-  end
+  
+  -- Force print even if locale key is missing
+  local msg = db.locked and (L["GPH HUD locked."] or "GPH HUD locked.") or (L["GPH HUD unlocked."] or "GPH HUD unlocked.")
+  A.info(msg)
 end
 
 do

@@ -1,0 +1,11 @@
+feat: Customize branding and HUD controls
+
+- Update TOC title to 'FonzAppraiser |cff00ff00Adimo|r Edition'.
+- Rename 'Show GPH HUD' to 'Show Gold Per Hour HUD' in settings.
+- Add '/fa show' and '/fa hide' slash commands for explicit HUD visibility control.
+- Add chat feedback to '/fa move' command.
+- Refactor HUD layout:
+  - Reduce frame size (130x70).
+  - Move 'X' close button to bottom-right (after Stop button).
+  - Adjust spacing between labels and values.
+  - Standardize button sizes (20x20).

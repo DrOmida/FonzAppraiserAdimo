@@ -1,6 +1,14 @@
 local A = FonzAppraiser
 
-A.HELP_VERSION = [[Version 3.3.1 - 2026-02-09 |cffffffff
+A.HELP_VERSION = [[Version 3.3.2 - 2026-02-09 |cffffffff
+[+] Added settings cogwheel to HUD.
+[+] Refactored HUD for compactness and transparency.
+[+] Added /fa show and /fa hide slash commands.
+[*] Fixed critical crash (Error #132) related to HUD interaction.
+[+] Added session duration to HUD.
+[*] Improved /fa move feedback.
+
+|rVersion 3.3.1 - 2026-02-09 |cffffffff
 [+] Added Gold Per Hour (GPH) HUD frame with Start/Pause/Stop controls.
 [+] Added Session Value to the GPH HUD.
 [+] Added Minimap button middle-click to toggle GPH HUD visibility.
