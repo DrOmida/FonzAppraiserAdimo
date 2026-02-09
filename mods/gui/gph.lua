@@ -18,8 +18,10 @@ local defaults = {
 }
 A.registerCharConfigDefaults("fa.gui.gph", defaults)
 
+local frame
+
 do
-  local frame = CreateFrame("Frame", "FonzAppraiserGphFrame", UIParent)
+  frame = CreateFrame("Frame", "FonzAppraiserGphFrame", UIParent)
   M.frame = frame
   gui.styles["panel"](frame)
   gui.setSize(frame, 200, 80)
@@ -98,20 +100,6 @@ do
   end
 end
 
-do
-  local elapsed = 0
-  
-  frame:SetScript("OnUpdate", function()
-    elapsed = elapsed + arg1
-    if elapsed >= 1 then
-      elapsed = 0
-      if frame:IsVisible() then
-        M.update()
-      end
-    end
-  end)
-end
-
 function M.applySettings()
   local db = A.getCharConfig("fa.gui.gph")
   frame:ClearAllPoints()
@@ -150,17 +138,31 @@ function M.update()
     frame:Hide()
   end
   
-  value:updateDisplay(session.getCurrentPerHourValue())
-  value_session:updateDisplay(session.getCurrentTotalValue())
+  M.value:updateDisplay(session.getCurrentPerHourValue())
+  M.value_session:updateDisplay(session.getCurrentTotalValue())
   
   if not session.isCurrent() then
-    start_pause_button:SetText(L["Start Session"])
-    stop_button:Disable()
+    M.start_pause_button:SetText(L["Start Session"])
+    M.stop_button:Disable()
   elseif session.isPaused() then
-    start_pause_button:SetText(L["Resume Session"])
-    stop_button:Enable()
+    M.start_pause_button:SetText(L["Resume Session"])
+    M.stop_button:Enable()
   else
-    start_pause_button:SetText(L["Pause Session"])
-    stop_button:Enable()
+    M.start_pause_button:SetText(L["Pause Session"])
+    M.stop_button:Enable()
   end
+end
+
+do
+  local elapsed = 0
+  
+  frame:SetScript("OnUpdate", function()
+    elapsed = elapsed + arg1
+    if elapsed >= 1 then
+      elapsed = 0
+      if frame:IsVisible() then
+        M.update()
+      end
+    end
+  end)
 end
