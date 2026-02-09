@@ -10,6 +10,7 @@ local util = A.requires(
 local gui = A.require 'fa.gui'
 local session = A.require 'fa.session'
 
+-- 1. Configuration Defaults
 local defaults = {
   show = true,
   locked = false,
@@ -21,251 +22,241 @@ local defaults = {
 }
 A.registerCharConfigDefaults("fa.gui.gph", defaults)
 
--- File-scope locals for internal access (bypassing module proxy)
+-- 2. Module Local Variables
 local frame
 local value, value_session, value_time
-local start_pause_button, stop_button
-local close_button, config_button
+local start_pause_button, stop_button, close_button, config_button
 local update -- Forward declaration
 
-do
-  frame = CreateFrame("Frame", "FonzAppraiserGphFrame", UIParent)
-  M.frame = frame
-  gui.styles["panel"](frame)
-  frame:SetBackdropColor(0, 0, 0, 0.3) -- 30% transparency
-  gui.setSize(frame, 120, 80) -- Increased width to 120
-  
-  -- Remove ClampedToScreen to prevent edge crashes in 1.12
-  -- if frame.SetClampedToScreen then
-  --   frame:SetClampedToScreen(true)
-  -- end
-  
-  frame:SetMovable(true)
-  frame:EnableMouse(true)
-  frame:RegisterForDrag("LeftButton")
-  frame:SetFrameStrata("LOW")
-  frame:SetFrameLevel(1) -- Ensure base level
-  
-  -- Explicitly consume mouse clicks to prevent fall-through crashes
-  frame:SetScript("OnMouseDown", function() end)
-  frame:SetScript("OnMouseUp", function() end)
-  
-  -- Use frame reference instead of 'this' for safety
-  frame:SetScript("OnDragStart", function()
-    local db = A.getCharConfig("fa.gui.gph")
-    if not db.locked then
-      frame:StartMoving()
-    end
-  end)
-  frame:SetScript("OnDragStop", function()
-    frame:StopMovingOrSizing()
-    local db = A.getCharConfig("fa.gui.gph")
-    local point, relativeTo, relativePoint, x, y = frame:GetPoint(1)
-    db.point = point
-    db.relative = relativeTo and relativeTo:GetName() or "UIParent"
-    db.relativePoint = relativePoint
-    db.x = x
-    db.y = y
-  end)
+-- 3. Local Helper: Safe Simple Button Factory
+-- Completely self-contained to avoid dependencies on external factories
+local function CreateSafeButton(parent, width, height, text, onClick)
+    local b = CreateFrame("Button", nil, parent)
+    b:SetWidth(width)
+    b:SetHeight(height)
+    
+    -- Background (Simulated)
+    local bg = b:CreateTexture(nil, "BACKGROUND")
+    bg:SetAllPoints(b)
+    bg:SetTexture(0, 0, 0, 0.5)
+    b.bg = bg
+    
+    -- Highlight
+    local hl = b:CreateTexture(nil, "HIGHLIGHT")
+    hl:SetAllPoints(b)
+    hl:SetTexture(1, 1, 1, 0.2)
+    b:SetHighlightTexture(hl)
+    
+    -- Text
+    local fs = b:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+    fs:SetPoint("CENTER", b, "CENTER", 0, 0)
+    fs:SetText(text or "")
+    b:SetFontString(fs)
+    
+    -- Visual Feedback
+    b:SetScript("OnMouseDown", function()
+        if b:IsEnabled() == 1 then 
+            bg:SetTexture(0.5, 0.5, 0.5, 0.5)
+            fs:SetPoint("CENTER", b, "CENTER", 1, -1)
+        end
+    end)
+    
+    b:SetScript("OnMouseUp", function()
+        bg:SetTexture(0, 0, 0, 0.5)
+        fs:SetPoint("CENTER", b, "CENTER", 0, 0)
+    end)
+    
+    -- Click Handler
+    b:SetScript("OnClick", function()
+        if onClick then onClick() end
+    end)
+    
+    return b
 end
 
+-- 4. Main HUD Frame Construction
 do
-  local label = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
-  label:SetPoint("TOPLEFT", frame, 6, -4)
-  label:SetText(L["Per Hour:"] or "Per Hour:")
-  
-  value = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-  M.value = value
-  value:SetPoint("TOPRIGHT", frame, -6, -4)
-  value:SetJustifyH("RIGHT")
-  value.updateDisplay = function(self, v)
-    v = v and util.formatMoneyFull(v, true, nil, true) or "-"
-    self:SetText(v)
-  end
+    -- Create the main container frame
+    frame = CreateFrame("Frame", "FonzAppraiserHUD", UIParent)
+    M.frame = frame
+    
+    -- Basic Layout
+    frame:SetWidth(120)
+    frame:SetHeight(85)
+    frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+    frame:SetFrameStrata("DIALOG") -- High strata to float above standard UI
+    frame:SetToplevel(true)
+    
+    -- Backdrop (Hardcoded for stability, independent of gui.styles)
+    frame:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+        tile = true, tileSize = 32, edgeSize = 16,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 }
+    })
+    frame:SetBackdropColor(0, 0, 0, 0.8)
+    
+    -- Drag Logic
+    frame:SetMovable(true)
+    frame:EnableMouse(true)
+    frame:RegisterForDrag("LeftButton")
+    
+    frame:SetScript("OnDragStart", function()
+        if not A.getCharConfig("fa.gui.gph").locked then
+            this:StartMoving()
+        end
+    end)
+    
+    frame:SetScript("OnDragStop", function()
+        this:StopMovingOrSizing()
+        -- Save position safely
+        local db = A.getCharConfig("fa.gui.gph")
+        if db then
+            local point, relativeTo, relativePoint, x, y = this:GetPoint()
+            db.point = point
+            db.relative = "UIParent" -- Always relative to UIParent for consistency
+            db.relativePoint = relativePoint
+            db.x = x
+            db.y = y
+        end
+    end)
+    
+    -- Prevent background clicks from doing anything weird
+    frame:SetScript("OnMouseDown", function() end)
+    frame:SetScript("OnMouseUp", function() end)
 
-  local label_session = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
-  label_session:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -2)
-  label_session:SetText(L["Session:"] or "Session:")
-  
-  value_session = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-  M.value_session = value_session
-  value_session:SetPoint("TOPRIGHT", value, "BOTTOMRIGHT", 0, -2)
-  value_session:SetJustifyH("RIGHT")
-  value_session.updateDisplay = function(self, v)
-    v = v and util.formatMoneyFull(v, true, nil, true) or "-"
-    self:SetText(v)
-  end
-
-  local label_time = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
-  label_time:SetPoint("TOPLEFT", label_session, "BOTTOMLEFT", 0, -2)
-  label_time:SetText(L["Duration:"] or "Duration:")
-  
-  value_time = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-  M.value_time = value_time
-  value_time:SetPoint("TOPRIGHT", value_session, "BOTTOMRIGHT", 0, -2)
-  value_time:SetJustifyH("RIGHT")
-  value_time.updateDisplay = function(self, v)
-    v = v and util.formatDurationFull(v) or "-"
-    self:SetText(v)
-  end
+    -- Data Display Labels
+    local function CreateRow(labelText, yOffset)
+        local l = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+        l:SetPoint("TOPLEFT", frame, "TOPLEFT", 10, yOffset)
+        l:SetText(labelText)
+        
+        local v = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+        v:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -10, yOffset)
+        v:SetJustifyH("RIGHT")
+        return v
+    end
+    
+    value = CreateRow(L["Per Hour:"] or "Per Hour:", -12)
+    M.value = value
+    
+    value_session = CreateRow(L["Session:"] or "Session:", -27)
+    M.value_session = value_session
+    
+    value_time = CreateRow(L["Duration:"] or "Duration:", -42)
+    M.value_time = value_time
+    
+    -- Value Update Methods
+    value.updateDisplay = function(self, v) 
+        self:SetText(v and util.formatMoneyFull(v, true, nil, true) or "-") 
+    end
+    value_session.updateDisplay = function(self, v) 
+        self:SetText(v and util.formatMoneyFull(v, true, nil, true) or "-") 
+    end
+    value_time.updateDisplay = function(self, v) 
+        self:SetText(v and util.formatDurationFull(v) or "-") 
+    end
+    
+    -- Control Buttons
+    -- Start/Pause (>)
+    start_pause_button = CreateSafeButton(frame, 20, 20, ">", function()
+        if not session.isCurrent() then
+            session.startSessionConfirm()
+        elseif session.isPaused() then
+            session.resumeSession()
+        else
+            session.pauseSession()
+        end
+    end)
+    start_pause_button:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 8, 8)
+    M.start_pause_button = start_pause_button
+    
+    -- Stop (S)
+    stop_button = CreateSafeButton(frame, 20, 20, "S", function()
+        session.stopSession()
+    end)
+    stop_button:SetPoint("LEFT", start_pause_button, "RIGHT", 4, 0)
+    M.stop_button = stop_button
+    
+    -- Config (O)
+    config_button = CreateSafeButton(frame, 20, 20, "O", function()
+        A.toggleMainWindow()
+    end)
+    config_button:SetPoint("LEFT", stop_button, "RIGHT", 4, 0)
+    M.config_button = config_button
+    
+    -- Close (X)
+    close_button = CreateSafeButton(frame, 20, 20, "X", function()
+        local db = A.getCharConfig("fa.gui.gph")
+        if db then db.show = false end
+        update()
+    end)
+    close_button:SetPoint("LEFT", config_button, "RIGHT", 4, 0)
+    M.close_button = close_button
+    
+    -- Tooltip Handlers
+    local function SetTooltip(btn, getMsg)
+        btn:SetScript("OnEnter", function()
+            GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+            GameTooltip:SetText(getMsg())
+            GameTooltip:Show()
+        end)
+        btn:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    end
+    
+    SetTooltip(start_pause_button, function()
+        local t = start_pause_button:GetText()
+        if t == ">" then return L["Start Session"]
+        elseif t == "P" then return L["Pause Session"]
+        else return L["Resume Session"] end
+    end)
+    SetTooltip(stop_button, function() return L["Stop Session"] end)
+    SetTooltip(config_button, function() return L["Open Configuration"] end)
+    SetTooltip(close_button, function() return L["Hide HUD"] end)
 end
 
-do
-  -- Start/Pause Button (P)
-  start_pause_button = gui.simpleButton(frame, nil, 20, 20, ">")
-  start_pause_button:SetFrameLevel(2) -- Ensure higher than background
-  M.start_pause_button = start_pause_button
-  start_pause_button:SetPoint("BOTTOMLEFT", frame, 6, 4)
-  start_pause_button.onClick = function()
-    if not session.isCurrent() then
-      session.startSessionConfirm()
-    elseif session.isPaused() then
-      session.resumeSession()
-    else
-      session.pauseSession()
-    end
-  end
-  start_pause_button:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(start_pause_button, "ANCHOR_RIGHT")
-    local text = start_pause_button:GetText()
-    if text == "Start" or text == ">" then
-        GameTooltip:SetText(L["Start Session"])
-    elseif text == "P" then
-        GameTooltip:SetText(L["Pause Session"])
-    elseif text == "R" then
-        GameTooltip:SetText(L["Resume Session"])
-    end
-    GameTooltip:Show()
-  end)
-  start_pause_button:SetScript("OnLeave", function() GameTooltip:Hide() end)
-  
-  -- Stop Button (S)
-  stop_button = gui.simpleButton(frame, nil, 20, 20, "S")
-  stop_button:SetFrameLevel(2)
-  M.stop_button = stop_button
-  stop_button:SetPoint("LEFT", start_pause_button, "RIGHT", 2, 0)
-  stop_button.onClick = function()
-    session.stopSession()
-  end
-  stop_button:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(stop_button, "ANCHOR_RIGHT")
-    GameTooltip:SetText(L["Stop Session"])
-    GameTooltip:Show()
-  end)
-  stop_button:SetScript("OnLeave", function() GameTooltip:Hide() end)
-
-  -- Config Button (Cogwheel/O)
-  config_button = gui.simpleButton(frame, nil, 20, 20, "O")
-  config_button:SetFrameLevel(2)
-  config_button:SetPoint("LEFT", stop_button, "RIGHT", 2, 0)
-  config_button.onClick = function()
-    A.toggleMainWindow()
-  end
-  config_button:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(config_button, "ANCHOR_RIGHT")
-    GameTooltip:SetText(L["Open Configuration"])
-    GameTooltip:Show()
-  end)
-  config_button:SetScript("OnLeave", function() GameTooltip:Hide() end)
-
-  -- Close button (X)
-  close_button = gui.simpleButton(frame, nil, 20, 20, "X")
-  close_button:SetFrameLevel(2)
-  close_button:SetPoint("LEFT", config_button, "RIGHT", 2, 0)
-  close_button.onClick = function()
-    local db = A.getCharConfig("fa.gui.gph")
-    db.show = false
-    update()
-  end
-  close_button:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(close_button, "ANCHOR_RIGHT")
-    GameTooltip:SetText(L["Hide HUD"])
-    GameTooltip:Show()
-  end)
-  close_button:SetScript("OnLeave", function() GameTooltip:Hide() end)
-end
-
--- Define update function locally first
+-- 5. Update Function
 update = function()
-  local db = A.getCharConfig("fa.gui.gph")
-  if not db then return end -- Safety check
-  
-  if db.show then
-    frame:Show()
-  else
-    frame:Hide()
-  end
-  
-  value:updateDisplay(session.getCurrentPerHourValue())
-  value_session:updateDisplay(session.getCurrentTotalValue())
-  
-  local _, current = session.isCurrent()
-  value_time:updateDisplay(current and session.getSessionDuration(current))
-  
-  if not session.isCurrent() then
-    start_pause_button:SetText(">")
-    stop_button:Disable()
-  elseif session.isPaused() then
-    start_pause_button:SetText("R")
-    stop_button:Enable()
-  else
-    start_pause_button:SetText("P")
-    stop_button:Enable()
-  end
-end
-M.update = update
-
-function M.applySettings()
-  local db = A.getCharConfig("fa.gui.gph")
-  frame:ClearAllPoints()
-  local relative = _G[db.relative] or UIParent
-  frame:SetPoint(db.point or "CENTER", relative, 
-    db.relativePoint or "CENTER", db.x or 0, db.y or 0)
-  if db.show then
-    frame:Show()
-  else
-    frame:Hide()
-  end
-  update()
-end
-
-function M.toggleWindow()
-  local db = A.getCharConfig("fa.gui.gph")
-  db.show = not db.show
-  update()
-end
-
-function M.showWindow()
-  local db = A.getCharConfig("fa.gui.gph")
-  db.show = true
-  update()
-end
-
-function M.hideWindow()
-  local db = A.getCharConfig("fa.gui.gph")
-  db.show = false
-  update()
-end
-
-function M.toggleLock()
-  local db = A.getCharConfig("fa.gui.gph")
-  db.locked = not db.locked
-  
-  -- Force print even if locale key is missing
-  local msg = db.locked and (L["GPH HUD locked."] or "GPH HUD locked.") or (L["GPH HUD unlocked."] or "GPH HUD unlocked.")
-  A.info(msg)
-end
-
-do
-  local elapsed = 0
-  
-  frame:SetScript("OnUpdate", function()
-    elapsed = elapsed + arg1
-    if elapsed >= 1 then
-      elapsed = 0
-      if frame:IsVisible() then
-        update() -- Call local update function
-      end
+    local db = A.getCharConfig("fa.gui.gph")
+    if not db then return end
+    
+    if db.show then
+        frame:Show()
+        -- Restore position if available
+        if db.point then
+            frame:ClearAllPoints()
+            frame:SetPoint(db.point, db.relative or "UIParent", db.relativePoint or "CENTER", db.x or 0, db.y or 0)
+        end
+    else
+        frame:Hide()
     end
-  end)
+    
+    -- Update Data
+    if value then value:updateDisplay(session.getCurrentPerHourValue()) end
+    if value_session then value_session:updateDisplay(session.getCurrentTotalValue()) end
+    
+    -- Update Duration
+    local currentSession = session.getCurrentSession()
+    local duration = 0
+    if currentSession then
+         -- Using session.sessionDuration logic locally if needed, but assuming session module handles it
+         -- We need to check if session.sessionDuration exists, otherwise implement simple calc
+         if session.sessionDuration then
+             duration = session.sessionDuration(currentSession)
+         end
+    end
+    if value_time then value_time:updateDisplay(duration) end
+    
+    -- Update Button State
+    if start_pause_button then
+        if session.isPaused() then
+            start_pause_button:SetText("R")
+        elseif session.isCurrent() then
+            start_pause_button:SetText("P")
+        else
+            start_pause_button:SetText(">")
+        end
+    end
 end
+
+M.update = update
