@@ -125,6 +125,16 @@ do
     frame:SetScript("OnMouseDown", function() end)
     frame:SetScript("OnMouseUp", function() end)
 
+    -- OnUpdate Handler for Real-time Updates (Throttled to 1s)
+    local elapsed = 0
+    frame:SetScript("OnUpdate", function()
+        elapsed = elapsed + arg1
+        if elapsed >= 1.0 then
+            update()
+            elapsed = 0
+        end
+    end)
+
     -- Data Display Labels
     local function CreateRow(labelText, yOffset)
         local l = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
