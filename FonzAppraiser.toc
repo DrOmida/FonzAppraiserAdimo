@@ -1,7 +1,7 @@
-## Interface: 30300
+## Interface: 11200
 ## Title: FonzAppraiser
 ## Notes: Tracks the value of personal loot. Command: /fa.
-## Author: fondlez
+## Author: fondlez, Adimo
 ## Version: 3.3.1
 ## OptionalDeps: aux-addon, Auctioneer, Auc-Advanced, Auctionator, TradeSkillMaster
 ## X-Website: http://github.com/fondlez

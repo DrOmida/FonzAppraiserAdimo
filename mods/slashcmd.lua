@@ -295,6 +295,12 @@ do
     desc = L["Value of non-soulbound items in bags (reverse)"],
     func = SlashCmdList.fa_rvalue,
   }
+  A.options.args["Move"] = {
+    type = "execute",
+    name = L["Toggle HUD Lock"],
+    desc = L["Toggle GPH HUD movement lock"],
+    func = toggleHudMove,
+  }
   A.options.args["Hud"] = {
     type = "execute",
     name = L["Toggle HUD"],

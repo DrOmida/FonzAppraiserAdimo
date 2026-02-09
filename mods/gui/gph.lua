@@ -22,13 +22,14 @@ A.registerCharConfigDefaults("fa.gui.gph", defaults)
 local frame
 local value, value_session
 local start_pause_button, stop_button
+local close_button
 local update -- Forward declaration
 
 do
   frame = CreateFrame("Frame", "FonzAppraiserGphFrame", UIParent)
   M.frame = frame
   gui.styles["panel"](frame)
-  gui.setSize(frame, 200, 80)
+  gui.setSize(frame, 150, 80) -- Reduced width
   frame:SetClampedToScreen(true)
   frame:SetMovable(true)
   frame:EnableMouse(true)
@@ -56,11 +57,26 @@ end
 do
   local label = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
   label:SetPoint("TOPLEFT", frame, 8, -8)
-  label:SetText(L["Hourly:"])
+  label:SetText(L["Hr:"])
+  
+  -- Close button (X)
+  close_button = gui.button(frame, nil, 20, 20, "X")
+  close_button:SetPoint("TOPRIGHT", frame, -4, -4)
+  close_button.onClick = function()
+    local db = A.getCharConfig("fa.gui.gph")
+    db.show = false
+    update()
+  end
+  close_button:SetScript("OnEnter", function()
+    GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+    GameTooltip:SetText(L["Hide HUD"])
+    GameTooltip:Show()
+  end)
+  close_button:SetScript("OnLeave", function() GameTooltip:Hide() end)
   
   value = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
   M.value = value
-  value:SetPoint("TOPRIGHT", frame, -8, -8)
+  value:SetPoint("TOPRIGHT", frame, -25, -8)
   value:SetJustifyH("RIGHT")
   value.updateDisplay = function(self, v)
     v = v and util.formatMoneyFull(v, true, nil, true) or "-"
@@ -69,7 +85,7 @@ do
 
   local label_session = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
   label_session:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -4)
-  label_session:SetText(L["Session:"])
+  label_session:SetText(L["Ses:"])
   
   value_session = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
   M.value_session = value_session
@@ -82,8 +98,8 @@ do
 end
 
 do
-  start_pause_button = gui.button(frame, nil, 90, 20, 
-    L["Start Session"])
+  -- Start/Pause Button (P)
+  start_pause_button = gui.button(frame, nil, 40, 20, "Start")
   M.start_pause_button = start_pause_button
   start_pause_button:SetPoint("BOTTOMLEFT", frame, 6, 6)
   start_pause_button.onClick = function()
@@ -95,13 +111,33 @@ do
       session.pauseSession()
     end
   end
+  start_pause_button:SetScript("OnEnter", function()
+    GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+    local text = this:GetText()
+    if text == "Start" then
+        GameTooltip:SetText(L["Start Session"])
+    elseif text == "P" then
+        GameTooltip:SetText(L["Pause Session"])
+    elseif text == "R" then
+        GameTooltip:SetText(L["Resume Session"])
+    end
+    GameTooltip:Show()
+  end)
+  start_pause_button:SetScript("OnLeave", function() GameTooltip:Hide() end)
   
-  stop_button = gui.button(frame, nil, 90, 20, L["Stop Session"])
+  -- Stop Button (S)
+  stop_button = gui.button(frame, nil, 20, 20, "S")
   M.stop_button = stop_button
-  stop_button:SetPoint("BOTTOMRIGHT", frame, -6, 6)
+  stop_button:SetPoint("LEFT", start_pause_button, "RIGHT", 4, 0)
   stop_button.onClick = function()
     session.stopSession()
   end
+  stop_button:SetScript("OnEnter", function()
+    GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+    GameTooltip:SetText(L["Stop Session"])
+    GameTooltip:Show()
+  end)
+  stop_button:SetScript("OnLeave", function() GameTooltip:Hide() end)
 end
 
 -- Define update function locally first
@@ -117,13 +153,13 @@ update = function()
   value_session:updateDisplay(session.getCurrentTotalValue())
   
   if not session.isCurrent() then
-    start_pause_button:SetText(L["Start Session"])
+    start_pause_button:SetText("Start")
     stop_button:Disable()
   elseif session.isPaused() then
-    start_pause_button:SetText(L["Resume Session"])
+    start_pause_button:SetText("R")
     stop_button:Enable()
   else
-    start_pause_button:SetText(L["Pause Session"])
+    start_pause_button:SetText("P")
     stop_button:Enable()
   end
 end
