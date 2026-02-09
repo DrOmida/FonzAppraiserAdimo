@@ -164,6 +164,7 @@ do
     frame:SetScript("OnMouseDown", function()
       if frame:IsEnabled() then
         bg:SetTexture(0, 0, 0, 0.5)
+        fs:ClearAllPoints()
         fs:SetPoint("CENTER", frame, "CENTER", 1, -1)
       end
     end)
@@ -171,6 +172,7 @@ do
     frame:SetScript("OnMouseUp", function()
       if frame:IsEnabled() then
         bg:SetTexture(0.1, 0.1, 0.1, 0.5)
+        fs:ClearAllPoints()
         fs:SetPoint("CENTER", frame, "CENTER", 0, 0)
       end
     end)
