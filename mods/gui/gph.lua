@@ -18,7 +18,11 @@ local defaults = {
 }
 A.registerCharConfigDefaults("fa.gui.gph", defaults)
 
+-- File-scope locals for internal access (bypassing module proxy)
 local frame
+local value, value_session
+local start_pause_button, stop_button
+local update -- Forward declaration
 
 do
   frame = CreateFrame("Frame", "FonzAppraiserGphFrame", UIParent)
@@ -54,7 +58,7 @@ do
   label:SetPoint("TOPLEFT", frame, 8, -8)
   label:SetText(L["Hourly:"])
   
-  local value = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+  value = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
   M.value = value
   value:SetPoint("TOPRIGHT", frame, -8, -8)
   value:SetJustifyH("RIGHT")
@@ -67,7 +71,7 @@ do
   label_session:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -4)
   label_session:SetText(L["Session:"])
   
-  local value_session = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+  value_session = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
   M.value_session = value_session
   value_session:SetPoint("TOPRIGHT", value, "BOTTOMRIGHT", 0, -4)
   value_session:SetJustifyH("RIGHT")
@@ -78,7 +82,7 @@ do
 end
 
 do
-  local start_pause_button = gui.button(frame, nil, 90, 20, 
+  start_pause_button = gui.button(frame, nil, 90, 20, 
     L["Start Session"])
   M.start_pause_button = start_pause_button
   start_pause_button:SetPoint("BOTTOMLEFT", frame, 6, 6)
@@ -92,13 +96,38 @@ do
     end
   end
   
-  local stop_button = gui.button(frame, nil, 90, 20, L["Stop Session"])
+  stop_button = gui.button(frame, nil, 90, 20, L["Stop Session"])
   M.stop_button = stop_button
   stop_button:SetPoint("BOTTOMRIGHT", frame, -6, 6)
   stop_button.onClick = function()
     session.stopSession()
   end
 end
+
+-- Define update function locally first
+update = function()
+  local db = A.getCharConfig("fa.gui.gph")
+  if db.show then
+    frame:Show()
+  else
+    frame:Hide()
+  end
+  
+  value:updateDisplay(session.getCurrentPerHourValue())
+  value_session:updateDisplay(session.getCurrentTotalValue())
+  
+  if not session.isCurrent() then
+    start_pause_button:SetText(L["Start Session"])
+    stop_button:Disable()
+  elseif session.isPaused() then
+    start_pause_button:SetText(L["Resume Session"])
+    stop_button:Enable()
+  else
+    start_pause_button:SetText(L["Pause Session"])
+    stop_button:Enable()
+  end
+end
+M.update = update
 
 function M.applySettings()
   local db = A.getCharConfig("fa.gui.gph")
@@ -111,13 +140,13 @@ function M.applySettings()
   else
     frame:Hide()
   end
-  M.update()
+  update()
 end
 
 function M.toggleWindow()
   local db = A.getCharConfig("fa.gui.gph")
   db.show = not db.show
-  M.update()
+  update()
 end
 
 function M.toggleLock()
@@ -130,29 +159,6 @@ function M.toggleLock()
   end
 end
 
-function M.update()
-  local db = A.getCharConfig("fa.gui.gph")
-  if db.show then
-    frame:Show()
-  else
-    frame:Hide()
-  end
-  
-  M.value:updateDisplay(session.getCurrentPerHourValue())
-  M.value_session:updateDisplay(session.getCurrentTotalValue())
-  
-  if not session.isCurrent() then
-    M.start_pause_button:SetText(L["Start Session"])
-    M.stop_button:Disable()
-  elseif session.isPaused() then
-    M.start_pause_button:SetText(L["Resume Session"])
-    M.stop_button:Enable()
-  else
-    M.start_pause_button:SetText(L["Pause Session"])
-    M.stop_button:Enable()
-  end
-end
-
 do
   local elapsed = 0
   
@@ -161,7 +167,7 @@ do
     if elapsed >= 1 then
       elapsed = 0
       if frame:IsVisible() then
-        M.update()
+        update() -- Call local update function
       end
     end
   end)
