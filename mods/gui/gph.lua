@@ -34,14 +34,21 @@ do
   gui.styles["panel"](frame)
   frame:SetBackdropColor(0, 0, 0, 0.3) -- 30% transparency
   gui.setSize(frame, 120, 80) -- Increased width to 120
-  if frame.SetClampedToScreen then
-    frame:SetClampedToScreen(true)
-  end
+  
+  -- Remove ClampedToScreen to prevent edge crashes in 1.12
+  -- if frame.SetClampedToScreen then
+  --   frame:SetClampedToScreen(true)
+  -- end
+  
   frame:SetMovable(true)
   frame:EnableMouse(true)
   frame:RegisterForDrag("LeftButton")
   frame:SetFrameStrata("LOW")
   frame:SetFrameLevel(1) -- Ensure base level
+  
+  -- Explicitly consume mouse clicks to prevent fall-through crashes
+  frame:SetScript("OnMouseDown", function() end)
+  frame:SetScript("OnMouseUp", function() end)
   
   -- Use frame reference instead of 'this' for safety
   frame:SetScript("OnDragStart", function()
