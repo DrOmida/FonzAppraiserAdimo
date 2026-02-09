@@ -33,7 +33,7 @@ do
   M.frame = frame
   gui.styles["panel"](frame)
   frame:SetBackdropColor(0, 0, 0, 0.3) -- 30% transparency
-  gui.setSize(frame, 98, 110) -- Increased height to 110 to fix overlap
+  gui.setSize(frame, 98, 80) -- Reduced height (80) to compact space between data and buttons
   frame:SetClampedToScreen(true)
   frame:SetMovable(true)
   frame:EnableMouse(true)
@@ -62,7 +62,7 @@ end
 do
   local label = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
   label:SetPoint("TOPLEFT", frame, 6, -4)
-  label:SetText(L["Hr:"])
+  label:SetText(L["Per Hour:"] or "Per Hour:")
   
   value = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
   M.value = value
@@ -75,7 +75,7 @@ do
 
   local label_session = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
   label_session:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -2)
-  label_session:SetText(L["Ses:"])
+  label_session:SetText(L["Session:"] or "Session:")
   
   value_session = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
   M.value_session = value_session
@@ -88,7 +88,7 @@ do
 
   local label_time = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
   label_time:SetPoint("TOPLEFT", label_session, "BOTTOMLEFT", 0, -2)
-  label_time:SetText(L["Dur:"] or "Dur:")
+  label_time:SetText(L["Duration:"] or "Duration:")
   
   value_time = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
   M.value_time = value_time
@@ -115,8 +115,8 @@ do
     end
   end
   start_pause_button:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
-    local text = this:GetText()
+    GameTooltip:SetOwner(start_pause_button, "ANCHOR_RIGHT")
+    local text = start_pause_button:GetText()
     if text == "Start" or text == ">" then
         GameTooltip:SetText(L["Start Session"])
     elseif text == "P" then
@@ -136,7 +136,7 @@ do
     session.stopSession()
   end
   stop_button:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+    GameTooltip:SetOwner(stop_button, "ANCHOR_RIGHT")
     GameTooltip:SetText(L["Stop Session"])
     GameTooltip:Show()
   end)
@@ -149,7 +149,7 @@ do
     A.toggleMainWindow()
   end
   config_button:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+    GameTooltip:SetOwner(config_button, "ANCHOR_RIGHT")
     GameTooltip:SetText(L["Open Configuration"])
     GameTooltip:Show()
   end)
@@ -164,7 +164,7 @@ do
     update()
   end
   close_button:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+    GameTooltip:SetOwner(close_button, "ANCHOR_RIGHT")
     GameTooltip:SetText(L["Hide HUD"])
     GameTooltip:Show()
   end)

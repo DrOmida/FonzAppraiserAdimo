@@ -143,6 +143,7 @@ FonzAppraiser_Locale_Data["enUS"] = {
   ["Session start"] = true,
   ["Session stop"] = true,
   ["Session"] = true,
+  ["Session:"] = true,
   ["Sessions list"] = true,
   ["Sessions purge"] = true,
   ["Sessions"] = true,
