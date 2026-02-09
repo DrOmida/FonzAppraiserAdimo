@@ -3,6 +3,15 @@
 FonzAppraiser is an addon for World of Warcraft (1.12, 2.4.3, 3.3.5 clients) to 
 track the value of personal loot.
 
+## Adimo Update (Turtle WoW 1.12.1)
+This fork was updated by **Adimo** with Turtle WoW compatibility in mind.
+
+### Added Features
+* Movable Gold-Per-Hour display frame.
+* Start / Pause / Resume / Stop controls for session tracking.
+* Minimap middle-click toggle to show or hide the GPH frame.
+* Pause-aware timing so session duration and GPH exclude paused time.
+
 ## Core Features
 
 ### General
