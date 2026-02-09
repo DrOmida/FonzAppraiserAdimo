@@ -261,3 +261,36 @@ end
 
 M.update = update
 M.applySettings = update -- Added to fix core.lua dependency
+
+-- Slash Command Helpers
+function M.showWindow()
+    local db = A.getCharConfig("fa.gui.gph")
+    if db then 
+        db.show = true 
+        update()
+    end
+end
+
+function M.hideWindow()
+    local db = A.getCharConfig("fa.gui.gph")
+    if db then 
+        db.show = false 
+        update()
+    end
+end
+
+function M.toggleWindow()
+    local db = A.getCharConfig("fa.gui.gph")
+    if db then 
+        db.show = not db.show 
+        update()
+    end
+end
+
+function M.toggleLock()
+    local db = A.getCharConfig("fa.gui.gph")
+    if db then 
+        db.locked = not db.locked
+        A.print("HUD movement " .. (db.locked and "LOCKED" or "UNLOCKED"))
+    end
+end
