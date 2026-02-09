@@ -177,15 +177,19 @@ do
       end
     end)
     
-    frame:SetScript("OnDisable", function()
+    local oldDisable = frame.Disable
+    frame.Disable = function(self)
+      if oldDisable then oldDisable(self) end
       fs:SetTextColor(0.5, 0.5, 0.5)
       bg:SetTexture(0.1, 0.1, 0.1, 0.2)
-    end)
-    
-    frame:SetScript("OnEnable", function()
+    end
+
+    local oldEnable = frame.Enable
+    frame.Enable = function(self)
+      if oldEnable then oldEnable(self) end
       fs:SetTextColor(1, 1, 1)
       bg:SetTexture(0.1, 0.1, 0.1, 0.5)
-    end)
+    end
     
     frame:SetScript("OnClick", function()
       PlaySound(sounds.click)
@@ -222,11 +226,14 @@ do
       end
     end)
     frame:SetScript("OnMouseUp", function()
-      frame.texture:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+      frame.texture:ClearAllPoints()
+      frame.texture:SetAllPoints(frame)
     end)
     frame:SetScript("OnMouseDown", function()
       if frame:IsEnabled() then
+        frame.texture:ClearAllPoints()
         frame.texture:SetPoint("TOPLEFT", frame, "TOPLEFT", 1, -1)
+        frame.texture:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 1, -1)
       end
     end)
     frame:SetScript("OnClick", function()
