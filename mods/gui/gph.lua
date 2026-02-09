@@ -58,11 +58,14 @@ do
   frame:SetScript("OnDragStop", function()
     frame:StopMovingOrSizing()
     
-    -- Re-enable buttons after drag
-    if start_pause_button then start_pause_button:EnableMouse(true) end
-    if stop_button then stop_button:EnableMouse(true) end
-    if config_button then config_button:EnableMouse(true) end
-    if close_button then close_button:EnableMouse(true) end
+    -- Delay re-enable buttons by one frame to prevent crash on release
+    frame:SetScript("OnUpdate", function()
+      frame:SetScript("OnUpdate", nil)
+      if start_pause_button then start_pause_button:EnableMouse(true) end
+      if stop_button then stop_button:EnableMouse(true) end
+      if config_button then config_button:EnableMouse(true) end
+      if close_button then close_button:EnableMouse(true) end
+    end)
     
     local db = A.getCharConfig("fa.gui.gph")
     local point, relativeTo, relativePoint, x, y = frame:GetPoint(1)
