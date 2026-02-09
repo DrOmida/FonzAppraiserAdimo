@@ -260,3 +260,4 @@ update = function()
 end
 
 M.update = update
+M.applySettings = update -- Added to fix core.lua dependency
