@@ -34,7 +34,9 @@ do
   gui.styles["panel"](frame)
   frame:SetBackdropColor(0, 0, 0, 0.3) -- 30% transparency
   gui.setSize(frame, 120, 80) -- Increased width to 120
-  frame:SetClampedToScreen(true)
+  if frame.SetClampedToScreen then
+    frame:SetClampedToScreen(true)
+  end
   frame:SetMovable(true)
   frame:EnableMouse(true)
   frame:RegisterForDrag("LeftButton")
@@ -44,11 +46,24 @@ do
   frame:SetScript("OnDragStart", function()
     local db = A.getCharConfig("fa.gui.gph")
     if not db.locked then
+      -- Disable buttons during drag to prevent tooltip conflicts/crashes
+      if start_pause_button then start_pause_button:EnableMouse(false) end
+      if stop_button then stop_button:EnableMouse(false) end
+      if config_button then config_button:EnableMouse(false) end
+      if close_button then close_button:EnableMouse(false) end
+      
       frame:StartMoving()
     end
   end)
   frame:SetScript("OnDragStop", function()
     frame:StopMovingOrSizing()
+    
+    -- Re-enable buttons after drag
+    if start_pause_button then start_pause_button:EnableMouse(true) end
+    if stop_button then stop_button:EnableMouse(true) end
+    if config_button then config_button:EnableMouse(true) end
+    if close_button then close_button:EnableMouse(true) end
+    
     local db = A.getCharConfig("fa.gui.gph")
     local point, relativeTo, relativePoint, x, y = frame:GetPoint(1)
     db.point = point
