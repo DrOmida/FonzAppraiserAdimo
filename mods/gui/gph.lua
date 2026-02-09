@@ -33,7 +33,7 @@ do
   M.frame = frame
   gui.styles["panel"](frame)
   frame:SetBackdropColor(0, 0, 0, 0.3) -- 30% transparency
-  gui.setSize(frame, 130, 64) -- Further reduced height
+  gui.setSize(frame, 98, 110) -- Increased height to 110 to fix overlap
   frame:SetClampedToScreen(true)
   frame:SetMovable(true)
   frame:EnableMouse(true)
@@ -61,12 +61,12 @@ end
 
 do
   local label = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
-  label:SetPoint("TOPLEFT", frame, 6, -6)
+  label:SetPoint("TOPLEFT", frame, 6, -4)
   label:SetText(L["Hr:"])
   
   value = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
   M.value = value
-  value:SetPoint("TOPRIGHT", frame, -6, -6)
+  value:SetPoint("TOPRIGHT", frame, -6, -4)
   value:SetJustifyH("RIGHT")
   value.updateDisplay = function(self, v)
     v = v and util.formatMoneyFull(v, true, nil, true) or "-"
@@ -88,7 +88,7 @@ do
 
   local label_time = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
   label_time:SetPoint("TOPLEFT", label_session, "BOTTOMLEFT", 0, -2)
-  label_time:SetText(L["Time:"] or "Time:")
+  label_time:SetText(L["Dur:"] or "Dur:")
   
   value_time = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
   M.value_time = value_time
@@ -104,7 +104,7 @@ do
   -- Start/Pause Button (P)
   start_pause_button = gui.button(frame, nil, 20, 20, "Start")
   M.start_pause_button = start_pause_button
-  start_pause_button:SetPoint("BOTTOMLEFT", frame, 6, 6)
+  start_pause_button:SetPoint("BOTTOMLEFT", frame, 6, 4)
   start_pause_button.onClick = function()
     if not session.isCurrent() then
       session.startSessionConfirm()
