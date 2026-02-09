@@ -79,7 +79,7 @@ do
   local fontstring = checkbox:CreateFontString()
   checkbox.text = fontstring
   fontstring:SetFontObject(GameFontNormal)
-  fontstring:SetText(L["Show GPH HUD"])
+  fontstring:SetText(L["Show Gold Per Hour HUD"])
   fontstring:SetPoint("TOPLEFT", confirm_oldest_checkbox.text, "BOTTOMLEFT", 0, 5)
   fontstring:SetJustifyH("LEFT")
   fontstring:SetJustifyV("TOP")

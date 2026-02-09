@@ -265,6 +265,14 @@ do
     gui_gph.toggleWindow()
   end
   
+  local function showHud()
+    gui_gph.showWindow()
+  end
+
+  local function hideHud()
+    gui_gph.hideWindow()
+  end
+  
   local function toggleHudMove()
     gui_gph.toggleLock()
   end
@@ -300,6 +308,18 @@ do
     name = L["Toggle HUD Lock"],
     desc = L["Toggle GPH HUD movement lock"],
     func = toggleHudMove,
+  }
+  A.options.args["Show"] = {
+    type = "execute",
+    name = L["Show HUD"],
+    desc = L["Show GPH HUD"],
+    func = showHud,
+  }
+  A.options.args["Hide"] = {
+    type = "execute",
+    name = L["Hide HUD"],
+    desc = L["Hide GPH HUD"],
+    func = hideHud,
   }
   A.options.args["Hud"] = {
     type = "execute",

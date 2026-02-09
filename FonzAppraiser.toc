@@ -1,5 +1,5 @@
 ## Interface: 11200
-## Title: FonzAppraiser
+## Title: FonzAppraiser |cff00ff00Adimo|r Edition
 ## Notes: Tracks the value of personal loot. Command: /fa.
 ## Author: fondlez, Adimo
 ## Version: 3.3.1

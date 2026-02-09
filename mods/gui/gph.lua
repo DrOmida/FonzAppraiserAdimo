@@ -29,7 +29,7 @@ do
   frame = CreateFrame("Frame", "FonzAppraiserGphFrame", UIParent)
   M.frame = frame
   gui.styles["panel"](frame)
-  gui.setSize(frame, 150, 80) -- Reduced width
+  gui.setSize(frame, 130, 70) -- Reduced width and height
   frame:SetClampedToScreen(true)
   frame:SetMovable(true)
   frame:EnableMouse(true)
@@ -56,27 +56,12 @@ end
 
 do
   local label = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
-  label:SetPoint("TOPLEFT", frame, 8, -8)
+  label:SetPoint("TOPLEFT", frame, 6, -6)
   label:SetText(L["Hr:"])
-  
-  -- Close button (X)
-  close_button = gui.button(frame, nil, 20, 20, "X")
-  close_button:SetPoint("TOPRIGHT", frame, -4, -4)
-  close_button.onClick = function()
-    local db = A.getCharConfig("fa.gui.gph")
-    db.show = false
-    update()
-  end
-  close_button:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
-    GameTooltip:SetText(L["Hide HUD"])
-    GameTooltip:Show()
-  end)
-  close_button:SetScript("OnLeave", function() GameTooltip:Hide() end)
   
   value = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
   M.value = value
-  value:SetPoint("TOPRIGHT", frame, -25, -8)
+  value:SetPoint("TOPRIGHT", frame, -6, -6)
   value:SetJustifyH("RIGHT")
   value.updateDisplay = function(self, v)
     v = v and util.formatMoneyFull(v, true, nil, true) or "-"
@@ -84,12 +69,12 @@ do
   end
 
   local label_session = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
-  label_session:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -4)
+  label_session:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -2)
   label_session:SetText(L["Ses:"])
   
   value_session = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
   M.value_session = value_session
-  value_session:SetPoint("TOPRIGHT", value, "BOTTOMRIGHT", 0, -4)
+  value_session:SetPoint("TOPRIGHT", value, "BOTTOMRIGHT", 0, -2)
   value_session:SetJustifyH("RIGHT")
   value_session.updateDisplay = function(self, v)
     v = v and util.formatMoneyFull(v, true, nil, true) or "-"
@@ -99,7 +84,7 @@ end
 
 do
   -- Start/Pause Button (P)
-  start_pause_button = gui.button(frame, nil, 40, 20, "Start")
+  start_pause_button = gui.button(frame, nil, 20, 20, "Start")
   M.start_pause_button = start_pause_button
   start_pause_button:SetPoint("BOTTOMLEFT", frame, 6, 6)
   start_pause_button.onClick = function()
@@ -114,7 +99,7 @@ do
   start_pause_button:SetScript("OnEnter", function()
     GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
     local text = this:GetText()
-    if text == "Start" then
+    if text == "Start" or text == ">" then
         GameTooltip:SetText(L["Start Session"])
     elseif text == "P" then
         GameTooltip:SetText(L["Pause Session"])
@@ -128,7 +113,7 @@ do
   -- Stop Button (S)
   stop_button = gui.button(frame, nil, 20, 20, "S")
   M.stop_button = stop_button
-  stop_button:SetPoint("LEFT", start_pause_button, "RIGHT", 4, 0)
+  stop_button:SetPoint("LEFT", start_pause_button, "RIGHT", 2, 0)
   stop_button.onClick = function()
     session.stopSession()
   end
@@ -138,6 +123,21 @@ do
     GameTooltip:Show()
   end)
   stop_button:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+  -- Close button (X)
+  close_button = gui.button(frame, nil, 20, 20, "X")
+  close_button:SetPoint("LEFT", stop_button, "RIGHT", 2, 0)
+  close_button.onClick = function()
+    local db = A.getCharConfig("fa.gui.gph")
+    db.show = false
+    update()
+  end
+  close_button:SetScript("OnEnter", function()
+    GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+    GameTooltip:SetText(L["Hide HUD"])
+    GameTooltip:Show()
+  end)
+  close_button:SetScript("OnLeave", function() GameTooltip:Hide() end)
 end
 
 -- Define update function locally first
@@ -153,7 +153,7 @@ update = function()
   value_session:updateDisplay(session.getCurrentTotalValue())
   
   if not session.isCurrent() then
-    start_pause_button:SetText("Start")
+    start_pause_button:SetText(">")
     stop_button:Disable()
   elseif session.isPaused() then
     start_pause_button:SetText("R")
@@ -182,6 +182,18 @@ end
 function M.toggleWindow()
   local db = A.getCharConfig("fa.gui.gph")
   db.show = not db.show
+  update()
+end
+
+function M.showWindow()
+  local db = A.getCharConfig("fa.gui.gph")
+  db.show = true
+  update()
+end
+
+function M.hideWindow()
+  local db = A.getCharConfig("fa.gui.gph")
+  db.show = false
   update()
 end
 
