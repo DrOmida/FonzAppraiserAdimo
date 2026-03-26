@@ -1,0 +1,5 @@
+gemini.md
+agent.md
+.gemini/
+*.tmp
+/tmp/

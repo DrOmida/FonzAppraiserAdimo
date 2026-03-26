@@ -75,26 +75,7 @@ function updateNameButton(self)
   self:SetText(session.getSessionName(s) or "-")
 end
 
-do
-  local isValidPerHourValue = session.isValidPerHourValue
-  local getCurrentPerHourValue = session.getCurrentPerHourValue
-  local value, current, money_loot_time, item_loot_time
-  
-  function updateGphValue()
-    --TODO(@fondlez): should not show for sessions that is not current
-    --[[
-    value, current, money_loot_time, item_loot_time = getCurrentPerHourValue()
-    gph_value:updateDisplay(value)
-    --]]
-  end
-  
-  function lazyUpdateGphValue()
-    if isValidPerHourValue(current, money_loot_time, item_loot_time) then
-      return
-    end
-    updateGphValue()
-  end
-end
+
 
 function updateDurationText(self)
   local duration_animation = self:GetParent().duration_animation
@@ -557,8 +538,6 @@ do
       duration_text:SetText(
         util.formatDurationFull(duration or 0))
       this.seenLast = GetTime()
-      
-      lazyUpdateGphValue()
     end
   end
 end

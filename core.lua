@@ -43,6 +43,8 @@ do
     --events.
     --These chat messages are checked only in groups.
     if not isInGroup() then return end
+    -- Skip all work if no session is active
+    if not session.isCurrent() then return end
     
     local money_string    
     --Shift-click money loot in a group.
@@ -92,6 +94,8 @@ do
   end
   
   function A:CHAT_MSG_LOOT(msg)
+    -- Skip all work if no session is active
+    if not session.isCurrent() then return end
     local loot_string
     _, _, loot_string = find(msg, PATTERN_ITEM_LOOT_SELF)
     if loot_string then 

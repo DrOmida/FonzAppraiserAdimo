@@ -12,7 +12,7 @@ local session = A.require 'fa.session'
 
 -- 1. Configuration Defaults
 local defaults = {
-  show = true,
+  show = false,
   locked = false,
   point = "CENTER",
   relative = "UIParent",
@@ -86,6 +86,7 @@ do
     frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     frame:SetFrameStrata("DIALOG") -- High strata to float above standard UI
     frame:SetToplevel(true)
+    frame:Hide() -- Hidden until applySettings() runs on ADDON_LOADED
     
     -- Backdrop (Hardcoded for stability, independent of gui.styles)
     frame:SetBackdrop({
@@ -130,8 +131,8 @@ do
     frame:SetScript("OnUpdate", function()
         elapsed = elapsed + arg1
         if elapsed >= 1.0 then
-            if updateData then updateData() end
             elapsed = 0
+            if updateData and frame:IsVisible() then updateData() end
         end
     end)
 
@@ -267,11 +268,10 @@ update = function()
              frame:ClearAllPoints()
              frame:SetPoint(db.point, db.relative or "UIParent", db.relativePoint or "CENTER", db.x or 0, db.y or 0)
         end
+        updateData()
     else
         frame:Hide()
     end
-    
-    updateData()
 end
 
 M.update = update

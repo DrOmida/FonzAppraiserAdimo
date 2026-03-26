@@ -42,7 +42,7 @@ function A.setCharConfigDefaults()
     
     local defaults = module["defaults"]
     for k, v in pairs(defaults) do
-      if not namespace[k] then
+      if namespace[k] == nil then
         namespace[k] = v
         found = true
       end
