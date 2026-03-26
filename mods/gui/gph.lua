@@ -84,8 +84,7 @@ do
     frame:SetWidth(120)
     frame:SetHeight(85)
     frame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-    frame:SetFrameStrata("DIALOG") -- High strata to float above standard UI
-    frame:SetToplevel(true)
+    frame:SetFrameStrata("BACKGROUND") -- Lowest strata so it doesn't overlap other addons
     frame:Hide() -- Hidden until applySettings() runs on ADDON_LOADED
     
     -- Backdrop (Hardcoded for stability, independent of gui.styles)
